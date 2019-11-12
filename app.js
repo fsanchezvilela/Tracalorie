@@ -2,6 +2,7 @@
 const StorageCtrl = (function () {
   //Public methods
   return {
+
     storeItem: function (item) {
       let items;
       // Check if any items in ls
@@ -23,6 +24,7 @@ const StorageCtrl = (function () {
       }
       localStorage.getItem('items');
     },
+
     getItemsFromStorage: function () {
       let items;
       if (localStorage.getItem('items') === null) {
@@ -31,6 +33,30 @@ const StorageCtrl = (function () {
         items = JSON.parse(localStorage.getItem('items'))
       }
       return items;
+    },
+
+    updateItemFromStorage: function (updatedItem) {
+      let items = JSON.parse(localStorage.getItem('items'));
+      items.forEach(function (item, index) {
+        if (updatedItem.id === item.id) {
+          items.splice(index, 1, updatedItem);
+        }
+      });
+      localStorage.setItem('items', JSON.stringify(items));
+    },
+
+    deleteItemFromStorage: function (id) {
+      let items = JSON.parse(localStorage.getItem('items'));
+      items.forEach(function (item, index) {
+        if (id === item.id) {
+          items.splice(index, 1);
+        }
+      });
+      localStorage.setItem('items', JSON.stringify(items));
+    },
+
+    clearItemsFromStorage: function () {
+      localStorage.removeItem('items');
     }
   }
 })()
@@ -384,6 +410,8 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
     // Add Total Calories to UI
     UICtrl.showTotalCalories(totalCalories);
 
+    // Update local sotrage
+    StorageCtrl.updateItemFromStorage(updatedItem);
     // Clear fields
     UICtrl.clearEditState();
 
@@ -404,6 +432,10 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
     const totalCalories = ItemCtrl.getTotalCalories();
     // Add Total Calories to UI
     UICtrl.showTotalCalories(totalCalories);
+
+    // Delete from local storage
+    StorageCtrl.deleteItemFromStorage(currentItem.id);
+
     // Clear fields
     UICtrl.clearEditState();
 
@@ -414,16 +446,17 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
   const clearAllItemsClick = function () {
     // Delete all items from data structure
     ItemCtrl.clearAllItems();
-
     //Get total Calories
     const totalCalories = ItemCtrl.getTotalCalories();
     // Add Total Calories to UI
     UICtrl.showTotalCalories(totalCalories);
     // Clear fields
     UICtrl.clearEditState();
+    // Clear from local storage
+    StorageCtrl.clearItemsFromStorage();
     // Remove from UI
     UICtrl.removeItems();
-
+    UICtrl.hideList();
   }
 
   //Init
